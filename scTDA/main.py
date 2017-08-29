@@ -61,7 +61,7 @@ def ParseAyasdiGraph(name, source, lab, user, password):
         r = session.post('https://platform.ayasdi.com/workbench/v0/sources/' + source + '/retrieve_row_indices',
                          data=json.dumps(payload), headers=headers)
         dic2[i] = json.loads(r.content)['row_indices']
-    with open(name + '.json', 'wb') as handle3:
+    with open(name + '.json', 'w') as handle3:
         json.dump(dic2, handle3)
     rowcount = []
     with open(name + '.gexf', 'w') as g:
@@ -106,7 +106,7 @@ def benjamini_hochberg(pvalues):
         rank = n - i
         pvalue, index = vals
         new_values.append((n/rank) * pvalue)
-    for i in xrange(0, int(n)-1):
+    for i in range(0, int(n)-1):
         if new_values[i] < new_values[i+1]:
             new_values[i+1] = new_values[i]
     for i, vals in enumerate(values):
@@ -175,10 +175,10 @@ def compare_results(table1, table2, threshold=0.05):
     total = set(total)
     pylab.figure()
     matplotlib_venn.venn2([set(f1p), set(f2p)], set_labels=[table1, table2])
-    print "Overlap between significant genes (Fisher's exact test p-value): " + str(scipy.stats.fisher_exact(
+    print("Overlap between significant genes (Fisher's exact test p-value): " + str(scipy.stats.fisher_exact(
         [[len(set(f1p) & set(f2p)), len(set(f1p)) - len(set(f1p) & set(f2p))],
          [len(set(f2p)) - len(set(f1p) & set(f2p)),
-          len(total) + len(set(f1p) & set(f2p)) - len(set(f1p)) - len(set(f2p))]])[1])
+          len(total) + len(set(f1p) & set(f2p)) - len(set(f1p)) - len(set(f2p))]])[1]))
     if rooted:
         pylab.figure()
         pylab.scatter(fx, fy, alpha=0.2, s=8)
@@ -188,7 +188,7 @@ def compare_results(table1, table2, threshold=0.05):
         pylab.ylim(int(min(fx + fy)), int(max(fx + fy)) + 1)
         pylab.xlabel('Centroids ' + table1)
         pylab.ylabel('Centroids ' + table2)
-        print "Pearson's correlation between centroids: " + str(scipy.stats.pearsonr(fx, fy))
+        print("Pearson's correlation between centroids: " + str(scipy.stats.pearsonr(fx, fy)))
         pylab.figure()
         pylab.scatter(gx, gy, alpha=0.2, s=8)
         xt = numpy.linspace(int(min(gx + gy)), int(max(gx + gy)) + 1, 10)
@@ -197,7 +197,7 @@ def compare_results(table1, table2, threshold=0.05):
         pylab.ylim(int(min(gx + gy)), int(max(gx + gy)) + 1)
         pylab.xlabel('Dispersion ' + table1)
         pylab.ylabel('Dispersion ' + table2)
-        print "Pearson's correlation between dispersions: " + str(scipy.stats.pearsonr(gx, gy))
+        print("Pearson's correlation between dispersions: " + str(scipy.stats.pearsonr(gx, gy)))
     pylab.show()
 
 
@@ -236,10 +236,10 @@ def hierarchical_clustering(mat, method='average', cluster_distance=True, labels
         axmatrix.set_xticks([])
         axmatrix.set_yticks([])
     else:
-        axmatrix.set_xticks(range(len(labels)))
+        axmatrix.set_xticks(list(range(len(labels))))
         lab = [labels[idx1[m]] for m in range(len(labels))]
         axmatrix.set_xticklabels(lab)
-        axmatrix.set_yticks(range(len(labels)))
+        axmatrix.set_yticks(list(range(len(labels))))
         axmatrix.set_yticklabels(lab)
         for tick in pylab.gca().xaxis.iter_ticks():
             tick[0].label2On = False
@@ -259,7 +259,7 @@ def find_clusters(z):
     for y, m in enumerate(z['dcoord']):
         for n, q in enumerate(m):
             if q == 0.0:
-                if z['color_list'][y] not in clus.keys():
+                if z['color_list'][y] not in list(clus.keys()):
                     clus[z['color_list'][y]] = [z['leaves'][int((z['icoord'][y][n]-5.0)/10.0)]]
                 else:
                     clus[z['color_list'][y]].append(z['leaves'][int((z['icoord'][y][n]-5.0)/10.0)])
@@ -319,7 +319,7 @@ class Preprocess(object):
             qty = 0
             for line in fol:
                 sp = line[:-1].split('\t')
-                q = numpy.array(map(lambda x: float(x), sp[1:]))
+                q = numpy.array([float(x) for x in sp[1:]])
                 if spike in sp[0]:
                     qft[f].append(q)
                     totalspikes[f] += q
@@ -391,7 +391,7 @@ class Preprocess(object):
             self.which_samples = self.which_samples_backup
             self.which_samples_subsampled = numpy.ones(len(self.data[0]), dtype=bool)
         self.sigmoid = False
-        print str(int(list(self.which_samples).count(True))) + ' cells remain after subsmapling'
+        print(str(int(list(self.which_samples).count(True))) + ' cells remain after subsmapling')
 
     def show_statistics(self):
         """
@@ -466,13 +466,13 @@ class Preprocess(object):
         if list(self.which_samples).count(False) > 0 or self.subsampled:
             pylab.hist(numpy.array(self.cdr_subsampled)[self.which_samples], 30, alpha=0.6, color='r')
         pylab.xlabel('Cell complexity')
-        print 'Minimum number of transcripts per cell: ' + \
-              str(int(min(self.totaltran[self.which_samples])))
-        print 'Minimum cell complexity: ' + str(int(min(numpy.array(self.cdr)[self.which_samples])))
+        print('Minimum number of transcripts per cell: ' + \
+              str(int(min(self.totaltran[self.which_samples]))))
+        print('Minimum cell complexity: ' + str(int(min(numpy.array(self.cdr)[self.which_samples]))))
         if self.subsampled:
-            print 'Minimum number of transcripts per cell (subsampled): ' + str(int(self.target_subsample))
-            print 'Minimum cell complexity (subsampled): ' + \
-                  str(int(min(numpy.array(self.cdr_subsampled)[self.which_samples])))
+            print('Minimum number of transcripts per cell (subsampled): ' + str(int(self.target_subsample)))
+            print('Minimum cell complexity (subsampled): ' + \
+                  str(int(min(numpy.array(self.cdr_subsampled)[self.which_samples]))))
         pylab.show()
 
     def fit_sigmoid(self, to_spikes=False):
@@ -537,12 +537,12 @@ class Preprocess(object):
         else:
             for n, (x1, y1) in enumerate(zip(list(ys_f), x)):
                 self.residuals[n] = y1 - sigmoid(x1, *popt)
-        pylab.hist(self.residuals.values(), 200, normed=True)
+        pylab.hist(list(self.residuals.values()), 200, normed=True)
         xst = numpy.linspace(min(self.residuals.values()), max(self.residuals.values()), 1000)
-        sig = numpy.median(self.residuals.values())-numpy.percentile(self.residuals.values(), 16)
-        pylab.plot(xst, scipy.stats.norm.pdf(xst, numpy.median(self.residuals.values()), sig), 'r-')
+        sig = numpy.median(list(self.residuals.values()))-numpy.percentile(list(self.residuals.values()), 16)
+        pylab.plot(xst, scipy.stats.norm.pdf(xst, numpy.median(list(self.residuals.values())), sig), 'r-')
         pylab.xlabel('Residuals')
-        for m in self.residuals.keys():
+        for m in list(self.residuals.keys()):
             self.residuals[m] /= sig
         self.sigmoid = True
         pylab.show()
@@ -556,7 +556,7 @@ class Preprocess(object):
         has been performed, it considers the subsampled dataset.
         """
         if min_z > -numpy.infty and not self.sigmoid:
-            print 'fit_sigmoid() needs to be run before selecting genes'
+            print('fit_sigmoid() needs to be run before selecting genes')
         else:
             if self.subsampled:
                 data = self.data_subsampled[:, self.which_samples]
@@ -593,7 +593,7 @@ class Preprocess(object):
             pylab.xlabel('Average transcripts per cell')
             pylab.ylabel('Fraction of cells with non-detected expression')
             pylab.ylim(-0.05, 1.05)
-            print str(int(col.count('r'))) + " genes were selected"
+            print(str(int(col.count('r'))) + " genes were selected")
             pylab.show()
 
     def reset_genes(self):
@@ -615,7 +615,7 @@ class Preprocess(object):
         """
         if (filterXlow != 0.0 or filterXhigh != 1.0e8 or
                     filterYlow != 0.0 or filterYhigh != 1.0e8) and self.spike == '_null_':
-            print 'No spike-ins selected'
+            print('No spike-ins selected')
         else:
             for n, (m, c) in enumerate(zip(list(self.totaltran), self.cdr)):
                 if m >= min_transcripts and c >= min_cdr:
@@ -649,9 +649,9 @@ class Preprocess(object):
                 pylab.xlabel('spike-in reads / average spike-in reads library')
                 pylab.ylabel('spike-in reads / uniquely mapped reads')
                 pylab.show()
-            print str(int(list(self.which_samples_backup).count(True))) + " cells were selected"
+            print(str(int(list(self.which_samples_backup).count(True))) + " cells were selected")
             if self.subsampled:
-                print '(' + str(int(list(self.which_samples).count(True))) + " cells after subsampling)"
+                print('(' + str(int(list(self.which_samples).count(True))) + " cells after subsampling)")
 
     def reset_cells(self):
         """
@@ -660,7 +660,7 @@ class Preprocess(object):
         self.which_samples = self.which_samples_subsampled
         self.which_samples_backup = numpy.ones(len(self.data[0]), dtype=bool)
 
-    def save(self, name):
+    def save(self, name, log2=True, libnorm=True):
         """
         Produces two tab separated files, called 'name.all.tsv' and 'name.mapper.tsv', where rows are the cells
         in self.which_samples. The first column of 'name.all.tsv' contains a unique identifier of the cell,
@@ -689,7 +689,13 @@ class Preprocess(object):
                         cv = self.target_subsample
                     else:
                         cv = self.totaltran[n]
-                    p += str(numpy.log2(1.0+1000000.0*t/float(cv))) + '\t'
+                    if libnorm:
+                        tpm = 1000000.0*t/float(cv)
+                        t = tpm
+                    if log2:
+                        p += str(numpy.log2(1.0+t)) + '\t'
+                    else:
+                        p += str(t) + '\t'
                 g.write(p[:-1] + '\n')
         g.close()
         if self.subsampled:
@@ -707,7 +713,13 @@ class Preprocess(object):
                             cv = self.target_subsample
                         else:
                             cv = self.totaltran[n]
-                        p += str(numpy.log2(1.0+1000000.0*t/float(cv))) + '\t'
+                        if libnorm:
+                            tpm = 1000000.0*t/float(cv) #scale expression to reads / million reads sequenced
+                            t = tpm
+                        if log2:
+                            p += str(numpy.log2(1.0+t)) + '\t'
+                        else:
+                            p += str(t) + '\t'
                     g.write(p[:-1] + '\n')
             g.close()
         g = open(name + '.mapper.tsv', 'w')
@@ -723,7 +735,13 @@ class Preprocess(object):
                         cv = self.target_subsample
                     else:
                         cv = self.totaltran[n]
-                    p += str(numpy.log2(1.0+1000000.0*t/float(cv))) + '\t'
+                    if libnorm:
+                        tpm = 1000000.0*t/float(cv)
+                        t = tpm
+                    if log2:
+                        p += str(numpy.log2(1.0+t)) + '\t'
+                    else:
+                        p += str(t) + '\t'
                 g.write(p[:-1] + '\n')
         g.close()
 
@@ -771,8 +789,8 @@ class TopologicalRepresentation(object):
                                                           stat=statistics, max_K=max_K)
         dic = {}
         for n, rs in enumerate(all_clusters):
-            dic[str(n)] = map(lambda x: int(x), rs)
-        with open(name + '.json', 'wb') as handle3:
+            dic[str(n)] = [int(x) for x in rs]
+        with open(name + '.json', 'w') as handle3:
             json.dump(dic, handle3)
         networkx.write_gexf(G, name + '.gexf')
         return patches
@@ -906,7 +924,7 @@ class UnrootedGraph(object):
         elif genin == '_CDR':
             genecolor = {}
             lista = []
-            for i in self.dic.keys():
+            for i in list(self.dic.keys()):
                 if con:
                     if str(i) in self.pl:
                         genecolor[str(i)] = 0.0
@@ -914,7 +932,7 @@ class UnrootedGraph(object):
                 else:
                     genecolor[str(i)] = 0.0
                     lista.append(i)
-            kis = range(len(self.cdr))
+            kis = list(range(len(self.cdr)))
             for i in sorted(lista):
                 pol = 0.0
                 for j in self.dic[i]:
@@ -923,7 +941,7 @@ class UnrootedGraph(object):
                 genecolor[str(i)] += pol
             tol = sum(genecolor.values())
             if tol > 0.0:
-                for ll in genecolor.keys():
+                for ll in list(genecolor.keys()):
                     genecolor[ll] = genecolor[ll]/tol
             return genecolor, tol
         else:
@@ -931,7 +949,7 @@ class UnrootedGraph(object):
                 genin = [genin]
             genecolor = {}
             lista = []
-            for i in self.dic.keys():
+            for i in list(self.dic.keys()):
                 if con:
                     if str(i) in self.pl:
                         genecolor[str(i)] = 0.0
@@ -945,7 +963,7 @@ class UnrootedGraph(object):
                         genecolor[str(i)] = 0.0
                 else:
                     geys = self.dicgenes[mju]
-                    kis = range(len(geys))
+                    kis = list(range(len(geys)))
                     for i in sorted(lista):
                         pol = 0.0
                         if self.log2 and not ignore_log:
@@ -959,7 +977,7 @@ class UnrootedGraph(object):
                         genecolor[str(i)] += pol
             tol = sum(genecolor.values())
             if tol > 0.0:
-                for ll in genecolor.keys():
+                for ll in list(genecolor.keys()):
                     genecolor[ll] = genecolor[ll]/tol
             return genecolor, tol
 
@@ -973,10 +991,10 @@ class UnrootedGraph(object):
             llm = list(numpy.arange(numpy.max(self.samples)+1)[self.samples])
             koi = {k: u for u, k in enumerate(llm)}
             geys = numpy.tile(self.dicgenes[genin], (n, 1))[:, self.samples]
-            map(numpy.random.shuffle, geys)
+            list(map(numpy.random.shuffle, geys))
             tot = numpy.zeros(n)
             for k, i in enumerate(self.pl):
-                pk = geys[:, numpy.array(map(lambda x: koi[x], self.dic[i]))]
+                pk = geys[:, numpy.array([koi[x] for x in self.dic[i]])]
                 q = pk.shape[1]
                 if self.log2:
                     t1 = numexpr.evaluate('sum(2**pk - 1, 1)')/q
@@ -1115,14 +1133,14 @@ class UnrootedGraph(object):
         as part of the calculation exceeds 'maximum_matrix_entries', the job is divided into multiple jobs, performed in series.
         The largest matrix has dimension (# nodes)*(# genes tested)^2.
         """
-        ge = numpy.array([self.get_gene(genis)[0].values() for genis in lista])
+        ge = numpy.array([list(self.get_gene(genis)[0].values()) for genis in lista])
         ge2 = numpy.copy(ge)
         ge2[ge2 == 0] = 1
         plogp = numpy.sum(ge2*numpy.log2(ge2), axis=1)
         plogptile = numpy.tile(plogp, (len(lista), 1))
         if len(ge)*len(ge[0])**2 <= maximum_matrix_entries:
             if verbose:
-                print 'within limits: %s' % (len(ge)*len(ge[0])**2)
+                print('within limits: %s' % (len(ge)*len(ge[0])**2))
             ge_tile = numpy.tile(ge,(len(lista), 1, 1))
             ge_tile_T = numpy.transpose(ge_tile, [1, 0, 2])
             pq = 0.5*(ge_tile + ge_tile_T)
@@ -1131,19 +1149,19 @@ class UnrootedGraph(object):
         else:
             group_number = len(ge)*len(ge[0])**2 / maximum_matrix_entries + 1
             group_length = len(ge) / group_number
-            dd = range(0, len(ge), group_length)
+            dd = list(range(0, len(ge), group_length))
             if dd[-1] != len(ge):
                 dd += [len(ge)]
             if verbose:
-                print 'outside limits: %s' % (len(ge)*len(ge[0])**2)
-                print 'group_number = %s' % group_number
-                print 'group_length = %s' % group_length
-                print 'dd = %s'%dd
+                print('outside limits: %s' % (len(ge)*len(ge[0])**2))
+                print('group_number = %s' % group_number)
+                print('group_length = %s' % group_length)
+                print('dd = %s'%dd)
             for i in range(len(dd)-1):
                 if verbose:
-                    print 'i = %s' % i
+                    print('i = %s' % i)
                 ge_tile = numpy.tile(ge, (dd[i+1] - dd[i], 1, 1))
-                ge_tile_T = numpy.transpose(numpy.tile(ge[range(dd[i], dd[i+1])], (len(ge), 1, 1)), [1, 0, 2])
+                ge_tile_T = numpy.transpose(numpy.tile(ge[list(range(dd[i], dd[i+1]))], (len(ge), 1, 1)), [1, 0, 2])
                 pq = 0.5*(ge_tile + ge_tile_T)
                 pq[pq == 0] = 1
                 sliver = numpy.sum(pq*numpy.log2(pq), axis=2)
@@ -1174,7 +1192,7 @@ class UnrootedGraph(object):
             pol[genis] = self.get_gene(genis)[0]
         for n, m1 in enumerate(lista):
             if verbose:
-                print n
+                print(n)
             ex1 = []
             for uu in self.pl:
                 ex1.append(pol[m1][uu])
@@ -1300,8 +1318,8 @@ class UnrootedGraph(object):
                 rows = [color[0]]
                 pylab.table(cellText=cell_text, rowLabels=rows, colLabels=columns, loc='bottom')
             elif type(color) == list and len(color) == 2:
-                valuesr = colorr.values()
-                valuesb = colorb.values()
+                valuesr = list(colorr.values())
+                valuesb = list(colorb.values())
                 cell_text = [[str(min(valuesr)*tolr), str(max(valuesr)*tolr), str(numpy.median(valuesr)*tolr),
                               str(self.expr(color[0])),
                               str(self.connectivity(color[0], ind=1)),
@@ -1314,9 +1332,9 @@ class UnrootedGraph(object):
                 rows = [color[0], color[1]]
                 pylab.table(cellText=cell_text, rowLabels=rows, colLabels=columns, loc='bottom', rowColours=['r', 'b'])
             elif type(color) == list and len(color) == 3:
-                valuesr = colorr.values()
-                valuesg = colorg.values()
-                valuesb = colorb.values()
+                valuesr = list(colorr.values())
+                valuesg = list(colorg.values())
+                valuesb = list(colorb.values())
                 cell_text = [[str(min(valuesr)*tolr), str(max(valuesr)*tolr), str(numpy.median(valuesr)*tolr),
                               str(self.expr(color[0])),
                               str(self.connectivity(color[0], ind=1)),
@@ -1351,7 +1369,7 @@ class UnrootedGraph(object):
         """
         genecolor = {}
         lista = []
-        for i in self.dic.keys():
+        for i in list(self.dic.keys()):
             if con:
                 if str(i) in self.pl:
                     genecolor[str(i)] = 0.0
@@ -1377,7 +1395,7 @@ class UnrootedGraph(object):
                 genecolor[str(i)] = pol/float(len(self.dic[i]))
         tol = sum(genecolor.values())
         if tol > 0.0:
-            for ll in genecolor.keys():
+            for ll in list(genecolor.keys()):
                 genecolor[ll] = genecolor[ll]/tol
         return genecolor, tol
 
@@ -1389,7 +1407,7 @@ class UnrootedGraph(object):
         of the number of nodes that contain the same cell. Finally, the fourth plot shows the distribution of
         transcripts in log_2(1+TPM) scale, after filtering.
         """
-        x = map(len, self.dic.values())
+        x = list(map(len, list(self.dic.values())))
         pylab.figure()
         pylab.hist(x, max(x)-1, alpha=0.6, color='b')
         pylab.xlabel('Cells per node')
@@ -1400,7 +1418,7 @@ class UnrootedGraph(object):
         pylab.hist(x, max(x)-1, alpha=0.6, color='g')
         pylab.xlabel('Shared cells between connected nodes')
         pel = []
-        for m in self.dic.values():
+        for m in list(self.dic.values()):
             pel += list(m)
         q = []
         for m in range(max(pel)+1):
@@ -1412,7 +1430,7 @@ class UnrootedGraph(object):
         pylab.xlabel('Number of nodes containing the same cell')
         pylab.figure()
         r = []
-        for m in self.dicgenes.keys():
+        for m in list(self.dicgenes.keys()):
             r += list(self.dicgenes[m])
         r = [k for k in r if 30 > k > 0.0]
         pylab.hist(r, 100, alpha=0.6)
@@ -1440,9 +1458,9 @@ class UnrootedGraph(object):
                     nam.append(sp[0])
         f.close()
         mat2 = self.JSD_matrix(nam)
-        return [map(lambda xx: nam[xx], m)
-                for m in find_clusters(hierarchical_clustering(mat2, labels=nam,
-                                                               cluster_distance=True, thres=clus_thres)).values()]
+        return [[nam[xx] for xx in m]
+                for m in list(find_clusters(hierarchical_clustering(mat2, labels=nam,
+                                                               cluster_distance=True, thres=clus_thres)).values())]
 
 
 class RootedGraph(UnrootedGraph):
@@ -1470,7 +1488,7 @@ class RootedGraph(UnrootedGraph):
             distroot = self.get_distroot(i)
             x = []
             y = []
-            for q in distroot.keys():
+            for q in list(distroot.keys()):
                 if distroot[q] != max(distroot.values()):
                     x.append(daycolor[q]-min(daycolor.values()))
                     y.append(distroot[q])
@@ -1486,7 +1504,7 @@ class RootedGraph(UnrootedGraph):
         q2 = -1000.0
         ind = 0
         ind2 = 0
-        for n in dendritem.keys():
+        for n in list(dendritem.keys()):
             if -2.0 < dendritem[n] < q:
                 q = dendritem[n]
                 ind = n
@@ -1575,7 +1593,7 @@ class RootedGraph(UnrootedGraph):
         while True:
             siz = 0
             novel = None
-            for ee in self.dicedgesize.keys():
+            for ee in list(self.dicedgesize.keys()):
                 if ((ee[0] == last and float(ee[1].split('_')[0]) > float(ee[0].split('_')[0]))
                     or (ee[1] == last and float(ee[0].split('_')[0]) > float(ee[1].split('_')[0]))) \
                         and self.dicedgesize[ee] > siz and ee not in lista:
@@ -1773,8 +1791,8 @@ class RootedGraph(UnrootedGraph):
         distroot_inv = {}
         if not path:
             pel = self.get_distroot(self.root)
-            for m in pel.keys():
-                if pel[m] not in distroot_inv.keys():
+            for m in list(pel.keys()):
+                if pel[m] not in list(distroot_inv.keys()):
                     distroot_inv[pel[m]] = [m]
                 else:
                     distroot_inv[pel[m]].append(m)
@@ -1790,10 +1808,10 @@ class RootedGraph(UnrootedGraph):
         if type(genin) != list:
             genin = [genin]
         polter = {}
-        for qsd in distroot_inv.keys():
+        for qsd in list(distroot_inv.keys()):
             genecolor = {}
             lista = []
-            for i in self.dic.keys():
+            for i in list(self.dic.keys()):
                 if str(i) in distroot_inv[qsd]:
                     genecolor[str(i)] = 0.0
                     lista += list(self.dic[i])
@@ -1805,7 +1823,7 @@ class RootedGraph(UnrootedGraph):
                         pol.append(numpy.power(2, float(geys[j]))-1.0)
                     else:
                         pol.append(float(geys[j]))
-            pol = map(lambda xcv: numpy.log2(1+xcv), pol)
+            pol = [numpy.log2(1+xcv) for xcv in pol]
             polter[qsd] = [numpy.mean(pol)-numpy.std(pol), numpy.mean(pol), numpy.mean(pol)+numpy.std(pol)]
         x = []
         y = []
@@ -1988,7 +2006,7 @@ class RootedGraph(UnrootedGraph):
             z = []
             for m in range(2, max_K):
                 y_pred = sklearn.cluster.KMeans(n_clusters=m, random_state=170).fit_predict(numpy.array(
-                    zip(con, [0.0]*len(con))))
+                    list(zip(con, [0.0]*len(con)))))
                 clus = [[] for _ in range(m)]
                 for t, q in zip(y_pred, con):
                     clus[t].append(q)
@@ -2015,7 +2033,7 @@ class RootedGraph(UnrootedGraph):
                 y.append(numpy.mean(ri))
                 z.append(ssb*(len(con)-m)/(ssw*(m-1)))
             pylab.figure()
-            pylab.plot(range(2, max_K), y, 'r-', linewidth=2.0)
+            pylab.plot(list(range(2, max_K)), y, 'r-', linewidth=2.0)
             r = numpy.infty
             rn = -1
             for n, m in enumerate(y):
@@ -2023,7 +2041,7 @@ class RootedGraph(UnrootedGraph):
                     rn = n
                     r = m
             y_pred = sklearn.cluster.KMeans(n_clusters=rn+2, random_state=170).fit_predict(
-                numpy.array(zip(con, [0.0]*len(con))))
+                numpy.array(list(zip(con, [0.0]*len(con)))))
             pylab.figure()
             pylab.scatter(contot, distot, c='k', alpha=0.1)
             pylab.scatter(con, dis, c=y_pred, alpha=0.6)
